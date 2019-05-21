@@ -1,17 +1,21 @@
 package pathFinder;
 
 import map.Coordinate;
+import map.Graph;
 import map.PathMap;
 
 import java.util.*;
 
 public class DijkstraPathFinder implements PathFinder {
-    // TODO: You might need to implement some attributes
+
+    // Graph representation of the map
+    private Graph graph;
+    private int coordinatesExploredCounter = 0;
 
     public DijkstraPathFinder(PathMap map) {
-        // TODO :Implement
+        graph = new Graph(map);
+        graph.initGraph();
     } // end of DijkstraPathFinder()
-
 
     @Override
     public List<Coordinate> findPath() {
@@ -27,11 +31,7 @@ public class DijkstraPathFinder implements PathFinder {
 
     @Override
     public int coordinatesExplored() {
-        // TODO: Implement (optional)
-
-        // placeholder
-        return 0;
+        return coordinatesExploredCounter;
     } // end of cellsExplored()
-
 
 } // end of class DijsktraPathFinder

@@ -1,7 +1,7 @@
 package map;
 
 /**
- * Represents an edge between two {@link Coordinate}s on the map
+ * Represents an edge/path between two {@link Coordinate}s on the map
  */
 public class Edge implements Comparable<Edge> {
 

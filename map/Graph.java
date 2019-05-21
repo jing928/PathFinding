@@ -3,6 +3,7 @@ package map;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * The adjacency list representation of the path map.
@@ -61,6 +62,14 @@ public class Graph {
         } else {
             nodeList.put(node, edges);
         }
+    }
+
+    public Set<Coordinate> getNodes() {
+        return nodeList.keySet();
+    }
+
+    public LinkedList<Edge> getNeighbors(Coordinate node) {
+        return nodeList.get(node);
     }
 
 }

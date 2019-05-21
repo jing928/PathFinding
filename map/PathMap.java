@@ -114,6 +114,18 @@ public class PathMap {
         return isIn(r, c) && !cells[r][c].getImpassable();
     } // end of isPassable()
 
+    /**
+     * Get cell at (r,c)
+     * @param r row index
+     * @param c col index
+     * @return the cell
+     */
+    public Coordinate getCell(int r, int c) {
+        if (!isIn(r, c)) {
+            return null;
+        }
+        return cells[r][c];
+    } // end of getCell()
 
     /**
      * Draw the map in a window.

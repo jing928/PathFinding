@@ -32,7 +32,8 @@ public class DijkstraPathFinder implements PathFinder {
     public List<Coordinate> findPath() {
         initDistances();
         initQueue();
-        while (!minDistQueue.isEmpty()) {
+        boolean destFound = false;
+        while (!minDistQueue.isEmpty() && !destFound) {
             Edge minDist = minDistQueue.remove();
             Coordinate node = minDist.getTo();
             if (!settledNodes.containsKey(node)) {
@@ -45,7 +46,11 @@ public class DijkstraPathFinder implements PathFinder {
                 }
                 settledNodes.put(node, edge);
                 coordinatesExploredCounter++;
-                updateNeighbors(node);
+                if (isDestination(node)) {
+                    destFound = true;
+                } else {
+                    updateNeighbors(node);
+                }
             }
         }
         return getShortestPath();
@@ -55,7 +60,9 @@ public class DijkstraPathFinder implements PathFinder {
         LinkedList<Coordinate> path = new LinkedList<>();
         List<Edge> distToDest = new ArrayList<>();
         for (Coordinate dest : destinations) {
-            distToDest.add(settledNodes.get(dest));
+            if (settledNodes.containsKey(dest)) {
+                distToDest.add(settledNodes.get(dest));
+            }
         }
         Edge shortestDistToDest = Collections.min(distToDest);
         boolean originFound = false;
@@ -111,6 +118,10 @@ public class DijkstraPathFinder implements PathFinder {
 
     private boolean isOrigin(Coordinate node) {
         return origins.contains(node);
+    }
+
+    private boolean isDestination(Coordinate node) {
+        return destinations.contains(node);
     }
 
     @Override

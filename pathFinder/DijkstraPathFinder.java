@@ -52,7 +52,7 @@ public class DijkstraPathFinder implements PathFinder {
     } // end of findPath()
 
     private List<Coordinate> getShortestPath() {
-        List<Coordinate> path = new LinkedList<>();
+        LinkedList<Coordinate> path = new LinkedList<>();
         List<Edge> distToDest = new ArrayList<>();
         for (Coordinate dest : destinations) {
             distToDest.add(settledNodes.get(dest));
@@ -61,7 +61,7 @@ public class DijkstraPathFinder implements PathFinder {
         boolean originFound = false;
         Coordinate prevNode = shortestDistToDest.getTo();
         while (!originFound) {
-            path.add(prevNode);
+            path.addFirst(prevNode);
             if (isOrigin(prevNode)) {
                 originFound = true;
             } else {

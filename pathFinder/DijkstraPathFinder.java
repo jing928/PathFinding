@@ -46,37 +46,53 @@ public class DijkstraPathFinder implements PathFinder {
                 }
                 settledNodes.put(node, edge);
                 coordinatesExploredCounter++;
-                if (isDestination(node)) {
+                if (destinations.contains(node)) {
                     destFound = true;
                 } else {
                     updateNeighbors(node);
                 }
             }
         }
-        return getShortestPath();
-    } // end of findPath()
+        updateShortestPath(origins, destinations);
+        List<Coordinate> lastDest = new ArrayList<>();
+        lastDest.add(shortestPath.getLast());
+        return lastDest;
+    }
 
-    private List<Coordinate> getShortestPath() {
+    private void updateShortestPath(List<Coordinate> origins, List<Coordinate> destinations) {
         LinkedList<Coordinate> path = new LinkedList<>();
         List<Edge> distToDest = new ArrayList<>();
         for (Coordinate dest : destinations) {
             if (settledNodes.containsKey(dest)) {
                 distToDest.add(settledNodes.get(dest));
+                // TODO: should break here
             }
         }
-        Edge shortestDistToDest = Collections.min(distToDest);
+        Edge shortestDistToDest = Collections.min(distToDest); // TODO: Possibly remove
         boolean originFound = false;
         Coordinate prevNode = shortestDistToDest.getTo();
+        // Remove the found destination from the list
+        destinations.remove(prevNode);
+
         while (!originFound) {
             path.addFirst(prevNode);
-            if (isOrigin(prevNode)) {
+            if (origins.contains(prevNode)) {
                 originFound = true;
             } else {
                 Edge edge = settledNodes.get(prevNode);
                 prevNode = edge.getFrom();
             }
         }
-        return path;
+        mergePaths(path);
+    }
+
+    private void mergePaths(LinkedList<Coordinate> path) {
+        if (shortestPath == null) {
+            shortestPath = path;
+        } else {
+            shortestPath.removeLast();
+            shortestPath.addAll(path);
+        }
     }
 
     private void updateNeighbors(Coordinate node) {
@@ -96,32 +112,28 @@ public class DijkstraPathFinder implements PathFinder {
     /**
      * Initialize distances from origin to each node
      */
-    private void initDistances() {
+    private void initDistances(List<Coordinate> origins) {
         distances = new HashMap<>();
         for (Coordinate origin : origins) {
             distances.put(origin, new Edge(origin, origin, 0));
         }
 
         for (Coordinate node : graph.getNodes()) {
-            if (!isOrigin(node)) {
+            if (!origins.contains(node)) {
                 distances.put(node, new Edge(null, node, Integer.MAX_VALUE));
             }
         }
     }
 
-    private void initQueue() {
+    private void initQueue(List<Coordinate> origins) {
         minDistQueue = new PriorityQueue<>();
         for (Coordinate origin : origins) {
             minDistQueue.add(distances.get(origin));
         }
     }
 
-    private boolean isOrigin(Coordinate node) {
-        return origins.contains(node);
-    }
-
-    private boolean isDestination(Coordinate node) {
-        return destinations.contains(node);
+    private void initSettledNodes() {
+        settledNodes = new HashMap<>();
     }
 
     @Override

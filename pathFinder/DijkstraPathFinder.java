@@ -39,6 +39,7 @@ public class DijkstraPathFinder implements PathFinder {
             }
             findPath(lastDest, destinations);
         }
+        System.out.println(shortestPath.size());
         return shortestPath;
     } // end of findPath()
 

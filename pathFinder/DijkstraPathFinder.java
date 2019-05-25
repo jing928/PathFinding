@@ -18,20 +18,34 @@ public class DijkstraPathFinder implements PathFinder {
     private List<Coordinate> destinations;
     // list of waypoint coordinates
     private List<Coordinate> waypoints;
+    private LinkedList<Coordinate> shortestPath;
 
     public DijkstraPathFinder(PathMap map) {
         origins = map.originCells;
         destinations = map.destCells;
         waypoints = map.waypointCells;
-        settledNodes = new HashMap<>();
         graph = new Graph(map);
         graph.initGraph();
     } // end of DijkstraPathFinder()
 
     @Override
     public List<Coordinate> findPath() {
-        initDistances();
-        initQueue();
+        if (waypoints.isEmpty()) {
+            findPath(origins, destinations);
+        } else {
+            List<Coordinate> lastDest = findPath(origins, waypoints);
+            while (!waypoints.isEmpty()) {
+                lastDest = findPath(lastDest, waypoints);
+            }
+            findPath(lastDest, destinations);
+        }
+        return shortestPath;
+    } // end of findPath()
+
+    private List<Coordinate> findPath(List<Coordinate> origins, List<Coordinate> destinations) {
+        initDistances(origins);
+        initQueue(origins);
+        initSettledNodes();
         boolean destFound = false;
         while (!minDistQueue.isEmpty() && !destFound) {
             Edge minDist = minDistQueue.remove();

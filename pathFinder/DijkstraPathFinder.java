@@ -67,7 +67,11 @@ public class DijkstraPathFinder implements PathFinder {
             }
             findPath(lastDest, destinations);
             if (totalCostOfCurrentPath < shortestPathQueue.peek().intValue()) {
-                shortestPathQueue.remove();
+                Integer lastDistance = shortestPathQueue.remove();
+                Integer lastIndex = distToIndex.remove(lastDistance);
+                if (lastIndex != null) {
+                    shortestPaths.remove(lastIndex.intValue());
+                }
                 shortestPathQueue.add(totalCostOfCurrentPath);
                 distToIndex.put(totalCostOfCurrentPath, shortestPaths.size());
                 shortestPaths.add(shortestPath);

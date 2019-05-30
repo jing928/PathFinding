@@ -123,6 +123,21 @@ public class DijkstraPathFinder implements PathFinder {
         }
     }
 
+    private void heapPermute(int n) {
+        if (n == 1) {
+            waypointsOrderList.add(new ArrayList<>(waypoints));
+        } else {
+            for (int i = 0; i < n; i++) {
+                heapPermute(n - 1);
+                if (n % 2 == 1) {
+                    Collections.swap(waypoints, 0, n - 1);
+                } else {
+                    Collections.swap(waypoints, i, n - 1);
+                }
+            }
+        }
+    }
+
     /**
      * Initialize distances from origin to each node
      */

@@ -18,7 +18,12 @@ public class DijkstraPathFinder implements PathFinder {
     private List<Coordinate> destinations;
     // list of waypoint coordinates
     private List<Coordinate> waypoints;
+    private List<List<Coordinate>> waypointsOrderList;
     private LinkedList<Coordinate> shortestPath;
+    private List<List<Coordinate>> shortestPaths;
+    private int totalCostOfCurrentPath;
+    private Map<Integer, Integer> distToIndex;
+    private PriorityQueue<Integer> shortestPathQueue;
 
     public DijkstraPathFinder(PathMap map) {
         origins = map.originCells;
@@ -30,17 +35,40 @@ public class DijkstraPathFinder implements PathFinder {
 
     @Override
     public List<Coordinate> findPath() {
+        totalCostOfCurrentPath = 0;
         if (waypoints.isEmpty()) {
             findPath(origins, destinations);
+            System.out.println("Total cost: " + totalCostOfCurrentPath);
+            return shortestPath;
         } else {
-            List<Coordinate> lastDest = findPath(origins, waypoints);
-            while (!waypoints.isEmpty()) {
-                lastDest = findPath(lastDest, waypoints);
+            waypointsOrderList = new ArrayList<>();
+            shortestPaths = new ArrayList<>();
+            distToIndex = new HashMap<>();
+            shortestPathQueue = new PriorityQueue<>();
+            heapPermute(waypoints.size());
+            int indexCounter = 0;
+            for (int i = 0; i < origins.size(); i++) {
+                List<Coordinate> origin = origins.subList(i, i + 1);
+                for (List<Coordinate> waypointsOrder : waypointsOrderList) {
+                    List<Coordinate> wayPointsOrderCopy = new ArrayList<>(waypointsOrder);
+                    List<Coordinate> lastDest = origin;
+                    while (!wayPointsOrderCopy.isEmpty()) {
+                        List<Coordinate> dest = new ArrayList<>();
+                        dest.add(wayPointsOrderCopy.remove(0));
+                        lastDest = findPath(lastDest, dest);
+                    }
+                    findPath(lastDest, destinations);
+                    shortestPaths.add(shortestPath);
+                    distToIndex.put(totalCostOfCurrentPath, indexCounter++);
+                    shortestPathQueue.add(totalCostOfCurrentPath);
+                    totalCostOfCurrentPath = 0;
+                    shortestPath = null;
+                }
             }
-            findPath(lastDest, destinations);
+            int shortestCost = shortestPathQueue.poll();
+            System.out.println("Total cost: " + shortestCost);
+            return shortestPaths.get(distToIndex.get(shortestCost));
         }
-        System.out.println("Total cost: " + shortestPath.size()); // TODO: not real cost
-        return shortestPath;
     } // end of findPath()
 
     private List<Coordinate> findPath(List<Coordinate> origins, List<Coordinate> destinations) {
@@ -90,6 +118,7 @@ public class DijkstraPathFinder implements PathFinder {
 
         while (!originFound) {
             path.addFirst(prevNode);
+            totalCostOfCurrentPath += prevNode.getTerrainCost();
             if (origins.contains(prevNode)) {
                 originFound = true;
             } else {

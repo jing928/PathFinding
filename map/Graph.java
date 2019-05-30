@@ -18,6 +18,9 @@ public class Graph {
         nodeList = new HashMap<>();
     }
 
+    /**
+     * Create graph from the PathMap
+     */
     public void initGraph() {
         for (int r = 0; r < map.sizeR; r++) {
             for (int c = 0; c < map.sizeC; c++) {
@@ -28,8 +31,8 @@ public class Graph {
 
     /**
      * Initialize a node and it out-neighbors
-     * @param r
-     * @param c
+     * @param r row number
+     * @param c column number
      */
     private void initNode(int r, int c) {
         Coordinate node = map.getCell(r, c);
@@ -64,10 +67,19 @@ public class Graph {
         }
     }
 
+    /**
+     * Get all nodes of the graph
+     * @return a set of all the nodes in the graph
+     */
     public Set<Coordinate> getNodes() {
         return nodeList.keySet();
     }
 
+    /**
+     * Get all the neighboring {@link Edge}s of a given node
+     * @param node a given node ({@link Coordinate}
+     * @return a {@link LinkedList} of neighboring {@link Edge}s
+     */
     public LinkedList<Edge> getNeighbors(Coordinate node) {
         return nodeList.get(node);
     }

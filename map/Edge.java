@@ -5,9 +5,9 @@ package map;
  */
 public class Edge implements Comparable<Edge> {
 
-    private Coordinate from;
-    private Coordinate to;
-    private int weight;
+    private Coordinate from; // The start Node of the Edge
+    private Coordinate to; // The end Node of the Edge
+    private int weight; // The weight/distance or cost or traveling through the Edge
 
     public Edge(Coordinate from, Coordinate to) {
         this(from, to, 1);
@@ -22,24 +22,12 @@ public class Edge implements Comparable<Edge> {
         return from;
     }
 
-    public void setFrom(Coordinate from) {
-        this.from = from;
-    }
-
     public Coordinate getTo() {
         return to;
     }
 
-    public void setTo(Coordinate to) {
-        this.to = to;
-    }
-
     public int getWeight() {
         return weight;
-    }
-
-    public void setWeight(int weight) {
-        this.weight = weight;
     }
 
     @Override

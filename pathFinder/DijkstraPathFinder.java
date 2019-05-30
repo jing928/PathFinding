@@ -39,7 +39,7 @@ public class DijkstraPathFinder implements PathFinder {
             }
             findPath(lastDest, destinations);
         }
-        System.out.println(shortestPath.size());
+        System.out.println("Total cost: " + shortestPath.size()); // TODO: not real cost
         return shortestPath;
     } // end of findPath()
 
@@ -76,14 +76,13 @@ public class DijkstraPathFinder implements PathFinder {
 
     private void updateShortestPath(List<Coordinate> origins, List<Coordinate> destinations) {
         LinkedList<Coordinate> path = new LinkedList<>();
-        List<Edge> distToDest = new ArrayList<>();
+        Edge shortestDistToDest = new Edge(null, null);
         for (Coordinate dest : destinations) {
             if (settledNodes.containsKey(dest)) {
-                distToDest.add(settledNodes.get(dest));
-                // TODO: should break here
+                shortestDistToDest = settledNodes.get(dest);
+                break;
             }
         }
-        Edge shortestDistToDest = Collections.min(distToDest); // TODO: Possibly remove
         boolean originFound = false;
         Coordinate prevNode = shortestDistToDest.getTo();
         // Remove the found destination from the list

@@ -113,8 +113,6 @@ public class DijkstraPathFinder implements PathFinder {
         }
         boolean originFound = false;
         Coordinate prevNode = shortestDistToDest.getTo();
-        // Remove the found destination from the list
-        destinations.remove(prevNode);
 
         while (!originFound) {
             path.addFirst(prevNode);

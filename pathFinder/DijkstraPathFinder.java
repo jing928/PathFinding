@@ -130,8 +130,10 @@ public class DijkstraPathFinder implements PathFinder {
     private void mergePaths(LinkedList<Coordinate> path) {
         if (shortestPath == null) {
             shortestPath = path;
+            totalCostOfCurrentPath -= shortestPath.getFirst().getTerrainCost();
         } else {
-            shortestPath.removeLast();
+            Coordinate lastNode = shortestPath.removeLast();
+            totalCostOfCurrentPath -= lastNode.getTerrainCost();
             shortestPath.addAll(path);
         }
     }

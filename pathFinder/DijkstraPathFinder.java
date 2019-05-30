@@ -18,7 +18,12 @@ public class DijkstraPathFinder implements PathFinder {
     private List<Coordinate> destinations;
     // list of waypoint coordinates
     private List<Coordinate> waypoints;
+    private List<List<Coordinate>> waypointsOrderList;
     private LinkedList<Coordinate> shortestPath;
+    private List<List<Coordinate>> shortestPaths;
+    private int totalCostOfCurrentPath;
+    private Map<Integer, Integer> distToIndex;
+    private PriorityQueue<Integer> shortestPathQueue;
 
     public DijkstraPathFinder(PathMap map) {
         origins = map.originCells;
@@ -30,16 +35,40 @@ public class DijkstraPathFinder implements PathFinder {
 
     @Override
     public List<Coordinate> findPath() {
+        totalCostOfCurrentPath = 0;
         if (waypoints.isEmpty()) {
             findPath(origins, destinations);
+            System.out.println("Total cost: " + totalCostOfCurrentPath);
+            return shortestPath;
         } else {
-            List<Coordinate> lastDest = findPath(origins, waypoints);
-            while (!waypoints.isEmpty()) {
-                lastDest = findPath(lastDest, waypoints);
+            waypointsOrderList = new ArrayList<>();
+            shortestPaths = new ArrayList<>();
+            distToIndex = new HashMap<>();
+            shortestPathQueue = new PriorityQueue<>();
+            heapPermute(waypoints.size());
+            int indexCounter = 0;
+            for (int i = 0; i < origins.size(); i++) {
+                List<Coordinate> origin = origins.subList(i, i + 1);
+                for (List<Coordinate> waypointsOrder : waypointsOrderList) {
+                    List<Coordinate> wayPointsOrderCopy = new ArrayList<>(waypointsOrder);
+                    List<Coordinate> lastDest = origin;
+                    while (!wayPointsOrderCopy.isEmpty()) {
+                        List<Coordinate> dest = new ArrayList<>();
+                        dest.add(wayPointsOrderCopy.remove(0));
+                        lastDest = findPath(lastDest, dest);
+                    }
+                    findPath(lastDest, destinations);
+                    shortestPaths.add(shortestPath);
+                    distToIndex.put(totalCostOfCurrentPath, indexCounter++);
+                    shortestPathQueue.add(totalCostOfCurrentPath);
+                    totalCostOfCurrentPath = 0;
+                    shortestPath = null;
+                }
             }
-            findPath(lastDest, destinations);
+            int shortestCost = shortestPathQueue.poll();
+            System.out.println("Total cost: " + shortestCost);
+            return shortestPaths.get(distToIndex.get(shortestCost));
         }
-        return shortestPath;
     } // end of findPath()
 
     private List<Coordinate> findPath(List<Coordinate> origins, List<Coordinate> destinations) {
@@ -75,21 +104,19 @@ public class DijkstraPathFinder implements PathFinder {
 
     private void updateShortestPath(List<Coordinate> origins, List<Coordinate> destinations) {
         LinkedList<Coordinate> path = new LinkedList<>();
-        List<Edge> distToDest = new ArrayList<>();
+        Edge shortestDistToDest = new Edge(null, null);
         for (Coordinate dest : destinations) {
             if (settledNodes.containsKey(dest)) {
-                distToDest.add(settledNodes.get(dest));
-                // TODO: should break here
+                shortestDistToDest = settledNodes.get(dest);
+                break;
             }
         }
-        Edge shortestDistToDest = Collections.min(distToDest); // TODO: Possibly remove
         boolean originFound = false;
         Coordinate prevNode = shortestDistToDest.getTo();
-        // Remove the found destination from the list
-        destinations.remove(prevNode);
 
         while (!originFound) {
             path.addFirst(prevNode);
+            totalCostOfCurrentPath += prevNode.getTerrainCost();
             if (origins.contains(prevNode)) {
                 originFound = true;
             } else {
@@ -119,6 +146,21 @@ public class DijkstraPathFinder implements PathFinder {
                 Edge newDist = new Edge(node, neighborNode, newDistValue);
                 distances.put(neighborNode, newDist);
                 minDistQueue.offer(newDist);
+            }
+        }
+    }
+
+    private void heapPermute(int n) {
+        if (n == 1) {
+            waypointsOrderList.add(new ArrayList<>(waypoints));
+        } else {
+            for (int i = 0; i < n; i++) {
+                heapPermute(n - 1);
+                if (n % 2 == 1) {
+                    Collections.swap(waypoints, 0, n - 1);
+                } else {
+                    Collections.swap(waypoints, i, n - 1);
+                }
             }
         }
     }

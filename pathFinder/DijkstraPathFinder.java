@@ -18,7 +18,6 @@ public class DijkstraPathFinder implements PathFinder {
     private List<Coordinate> destinations;
     // list of waypoint coordinates
     private List<Coordinate> waypoints;
-    private List<List<Coordinate>> waypointsOrderList;
     private LinkedList<Coordinate> shortestPath;
     private List<List<Coordinate>> shortestPaths;
     private int totalCostOfCurrentPath;
@@ -41,35 +40,46 @@ public class DijkstraPathFinder implements PathFinder {
             System.out.println("Total cost: " + totalCostOfCurrentPath);
             return shortestPath;
         } else {
-            waypointsOrderList = new ArrayList<>();
-            shortestPaths = new ArrayList<>();
-            distToIndex = new HashMap<>();
-            shortestPathQueue = new PriorityQueue<>();
-            heapPermute(waypoints.size());
-            int indexCounter = 0;
-            for (int i = 0; i < origins.size(); i++) {
-                List<Coordinate> origin = origins.subList(i, i + 1);
-                for (List<Coordinate> waypointsOrder : waypointsOrderList) {
-                    List<Coordinate> wayPointsOrderCopy = new ArrayList<>(waypointsOrder);
-                    List<Coordinate> lastDest = origin;
-                    while (!wayPointsOrderCopy.isEmpty()) {
-                        List<Coordinate> dest = new ArrayList<>();
-                        dest.add(wayPointsOrderCopy.remove(0));
-                        lastDest = findPath(lastDest, dest);
-                    }
-                    findPath(lastDest, destinations);
-                    shortestPaths.add(shortestPath);
-                    distToIndex.put(totalCostOfCurrentPath, indexCounter++);
-                    shortestPathQueue.add(totalCostOfCurrentPath);
-                    totalCostOfCurrentPath = 0;
-                    shortestPath = null;
-                }
-            }
+            findPathWithWayPoints();
             int shortestCost = shortestPathQueue.poll();
             System.out.println("Total cost: " + shortestCost);
             return shortestPaths.get(distToIndex.get(shortestCost));
         }
     } // end of findPath()
+
+    private void findPathWithWayPoints() {
+        shortestPaths = new ArrayList<>();
+        distToIndex = new HashMap<>();
+        shortestPathQueue = new PriorityQueue<>();
+        shortestPathQueue.add(Integer.MAX_VALUE);
+        findPathForEachPermutation(waypoints.size());
+    }
+
+    private void calculatePath(List<Coordinate> waypointsOrder) {
+        for (int i = 0; i < origins.size(); i++) {
+            List<Coordinate> waypointsOrderCopy = new ArrayList<>(waypointsOrder);
+            List<Coordinate> origin = origins.subList(i, i + 1);
+            List<Coordinate> lastDest = origin;
+            while (!waypointsOrderCopy.isEmpty()) {
+                List<Coordinate> dest = new ArrayList<>();
+                dest.add(waypointsOrderCopy.remove(0));
+                lastDest = findPath(lastDest, dest);
+            }
+            findPath(lastDest, destinations);
+            if (totalCostOfCurrentPath < shortestPathQueue.peek().intValue()) {
+                Integer lastDistance = shortestPathQueue.remove();
+                Integer lastIndex = distToIndex.remove(lastDistance);
+                if (lastIndex != null) {
+                    shortestPaths.remove(lastIndex.intValue());
+                }
+                shortestPathQueue.add(totalCostOfCurrentPath);
+                distToIndex.put(totalCostOfCurrentPath, shortestPaths.size());
+                shortestPaths.add(shortestPath);
+            }
+            totalCostOfCurrentPath = 0;
+            shortestPath = null;
+        }
+    }
 
     private List<Coordinate> findPath(List<Coordinate> origins, List<Coordinate> destinations) {
         initDistances(origins);
@@ -130,8 +140,10 @@ public class DijkstraPathFinder implements PathFinder {
     private void mergePaths(LinkedList<Coordinate> path) {
         if (shortestPath == null) {
             shortestPath = path;
+            totalCostOfCurrentPath -= shortestPath.getFirst().getTerrainCost();
         } else {
-            shortestPath.removeLast();
+            Coordinate lastNode = shortestPath.removeLast();
+            totalCostOfCurrentPath -= lastNode.getTerrainCost();
             shortestPath.addAll(path);
         }
     }
@@ -150,12 +162,12 @@ public class DijkstraPathFinder implements PathFinder {
         }
     }
 
-    private void heapPermute(int n) {
+    private void findPathForEachPermutation(int n) {
         if (n == 1) {
-            waypointsOrderList.add(new ArrayList<>(waypoints));
+            calculatePath(new ArrayList<>(waypoints));
         } else {
             for (int i = 0; i < n; i++) {
-                heapPermute(n - 1);
+                findPathForEachPermutation(n - 1);
                 if (n % 2 == 1) {
                     Collections.swap(waypoints, 0, n - 1);
                 } else {

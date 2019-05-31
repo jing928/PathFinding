@@ -184,6 +184,10 @@ public class DijkstraPathFinder implements PathFinder {
      */
     private void updateNeighbors(Coordinate node) {
         List<Edge> neighborEdges = graph.getNeighbors(node);
+        if (neighborEdges == null) {
+            // Return when the node has no neighbor
+            return;
+        }
         for (Edge neighborEdge : neighborEdges) {
             Coordinate neighborNode = neighborEdge.getTo();
             int currentDistValue = distances.get(neighborNode).getWeight();

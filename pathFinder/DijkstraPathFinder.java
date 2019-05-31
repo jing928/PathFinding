@@ -122,7 +122,6 @@ public class DijkstraPathFinder implements PathFinder {
                 List<Coordinate> dest = new ArrayList<>();
                 dest.add(waypointsOrderCopy.remove(0));
                 lastDest = findPath(lastDest, dest);
-                // TODO: waypoint might be inaccessible
             }
             if (!findPath(lastDest, destinations).isEmpty()) {
                 if (totalCostOfCurrentPath < minCost) {
